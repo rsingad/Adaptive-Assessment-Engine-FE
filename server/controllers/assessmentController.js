@@ -39,6 +39,7 @@ exports.startAssessment = async (req, res) => {
     res.status(201).json({
       assessmentId: assessment._id,
       ability: INITIAL_ABILITY,
+      abilityPercentage: Math.round(INITIAL_ABILITY * 100),
       questionCount: 1,
       totalQuestions: MAX_QUESTIONS,
       question: {
@@ -46,10 +47,11 @@ exports.startAssessment = async (req, res) => {
         text: question.question,
         options: question.options,
         difficulty: question.difficulty,
+        difficultyPercentage: Math.round((question.difficulty || 0.5) * 100),
         topic: question.topic,
         prerequisite: question.prerequisite
       },
-      reason: "Starting assessment with medium difficulty baseline (0.50)."
+      reason: `Starting assessment with baseline difficulty at ${Math.round(INITIAL_ABILITY * 100)}%.`
     });
   } catch (error) {
     console.error('Error starting assessment:', error);
@@ -147,7 +149,9 @@ exports.submitAnswer = async (req, res) => {
       correct: isCorrect,
       explanation: currentQuestion.explanation,
       abilityBefore,
+      abilityBeforePercentage: Math.round(abilityBefore * 100),
       abilityAfter,
+      abilityAfterPercentage: Math.round(abilityAfter * 100),
       completed: isCompleted,
       questionCount: assessment.questionHistory.length,
       totalQuestions: MAX_QUESTIONS,
@@ -157,6 +161,7 @@ exports.submitAnswer = async (req, res) => {
         text: nextQuestion.question,
         options: nextQuestion.options,
         difficulty: nextQuestion.difficulty,
+        difficultyPercentage: Math.round((nextQuestion.difficulty || 0.5) * 100),
         topic: nextQuestion.topic,
         prerequisite: nextQuestion.prerequisite
       }

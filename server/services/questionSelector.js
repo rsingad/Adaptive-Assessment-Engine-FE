@@ -42,34 +42,15 @@ async function selectNextQuestion({ targetAbility, excludeQuestionIds = [], last
     }
   }
 
-  // 2. Default adaptive selection: Find unused questions closest to target ability
-  const availableQuestions = await Question.find({
-    _id: { $nin: excludeQuestionIds },
-    subject
+  // Always generate a fresh, unique AI question on selection or fallback
+  const aiQuestion = await generateAIQuestion({
+    subject,
+    topic: lastQuestion ? lastQuestion.topic : (subject === 'DSA' ? 'Arrays' : subject),
+    targetDifficulty: targetAbility
   });
 
-  if (availableQuestions.length === 0) {
-    // AI Fallback Generation for General Ability Level
-    const aiQuestion = await generateAIQuestion({
-      subject,
-      topic: lastQuestion ? lastQuestion.topic : 'Arrays',
-      targetDifficulty: targetAbility
-    });
-
-    return {
-      question: aiQuestion,
-      prerequisiteTriggered: false,
-      prerequisiteTopic: null
-    };
-  }
-
-  // Sort by absolute distance between question difficulty and student ability
-  availableQuestions.sort((a, b) => 
-    Math.abs(a.difficulty - targetAbility) - Math.abs(b.difficulty - targetAbility)
-  );
-
   return {
-    question: availableQuestions[0],
+    question: aiQuestion,
     prerequisiteTriggered: false,
     prerequisiteTopic: null
   };

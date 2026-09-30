@@ -20,15 +20,18 @@ function updateAbility(currentAbility, isCorrect) {
  * Generate human-readable reason for why a question was selected.
  */
 function generateReason({ isCorrect, abilityBefore, abilityAfter, prerequisiteTriggered, prerequisiteTopic, topic }) {
+  const pctBefore = Math.round(abilityBefore * 100);
+  const pctAfter = Math.round(abilityAfter * 100);
+
   if (prerequisiteTriggered) {
     return `Incorrect answer detected on topic '${topic}'. Checking prerequisite foundation in '${prerequisiteTopic}'. Difficulty adjusted to match prerequisite level.`;
   }
 
   if (isCorrect) {
-    return `Correct answer! Increasing student ability score from ${abilityBefore.toFixed(2)} → ${abilityAfter.toFixed(2)}. Selecting next question with matching higher difficulty.`;
+    return `Correct answer! Increasing student ability score from ${pctBefore}% → ${pctAfter}%. Selecting next question with matching higher difficulty.`;
   }
 
-  return `Incorrect answer. Decreasing student ability score from ${abilityBefore.toFixed(2)} → ${abilityAfter.toFixed(2)}. Selecting lower difficulty question to recalibrate.`;
+  return `Incorrect answer. Decreasing student ability score from ${pctBefore}% → ${pctAfter}%. Selecting lower difficulty question to recalibrate.`;
 }
 
 module.exports = {
