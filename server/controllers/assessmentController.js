@@ -238,3 +238,65 @@ exports.getResults = async (req, res) => {
     res.status(500).json({ error: 'Failed to retrieve assessment results' });
   }
 };
+
+/**
+ * GET /api/assessment/subjects
+ * Returns available subjects and topics for assessment
+ */
+exports.getSubjects = async (req, res) => {
+  try {
+    const subjects = await Question.distinct('subject');
+    const topicsBySubject = {};
+
+    for (const sub of subjects) {
+      const topics = await Question.distinct('topic', { subject: sub });
+      topicsBySubject[sub] = topics;
+    }
+
+    res.status(200).json({
+      subjects,
+      topicsBySubject
+    });
+  } catch (error) {
+    console.error('Error fetching subjects:', error);
+    res.status(500).json({ error: 'Failed to fetch subjects' });
+  }
+};
+
+/**
+ * GET /api/assessment/user/:userId/profile
+ * Returns overall user performance summary across all test sessions
+ */
+exports.getUserProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const assessments = await Assessment.find({ userId }).sort({ createdAt: -1 });
+
+    if (!assessments || assessments.length === 0) {
+      return res.status(200).json({
+        userId,
+        totalAssessments: 0,
+        averageAbility: 0.50,
+        latestAbility: 0.50,
+        completedCount: 0,
+        assessments: []
+      });
+    }
+
+    const completed = assessments.filter(a => a.status === 'completed');
+    const totalAbility = assessments.reduce((acc, curr) => acc + curr.ability, 0);
+
+    res.status(200).json({
+      userId,
+      totalAssessments: assessments.length,
+      completedCount: completed.length,
+      averageAbility: Number((totalAbility / assessments.length).toFixed(2)),
+      latestAbility: assessments[0].ability,
+      recentAssessments: assessments.slice(0, 5)
+    });
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+    res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+};
+

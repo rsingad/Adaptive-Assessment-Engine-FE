@@ -26,9 +26,9 @@ Return strictly a raw valid JSON object with NO markdown formatting, NO backtick
   "explanation": "Short explanation of correct answer"
 }`;
 
-      const chatCompletion = await groq.chatCompletions.create({
+      const chatCompletion = await groq.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
-        model: 'llama3-8b-8192',
+        model: 'qwen/qwen3.8-27b',
         temperature: 0.5,
         response_format: { type: 'json_object' }
       });
