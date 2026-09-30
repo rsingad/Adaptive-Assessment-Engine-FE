@@ -1,18 +1,20 @@
 const Groq = require('groq-sdk');
 const Question = require('../models/Question');
 
-const groq = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
-
 /**
  * AI Question Generator via Groq API (fallback when pre-seeded database questions run out)
- * Uses ultra-fast Llama-3 / Mixtral models via Groq SDK.
+ * Uses ultra-fast Qwen / Llama models via Groq SDK.
  */
 async function generateAIQuestion({ subject = 'DSA', topic, prerequisiteTopic, targetDifficulty }) {
   const selectedTopic = topic || prerequisiteTopic || 'Arrays';
   console.log(`[Groq AI Generator] Generating question for Subject: ${subject}, Topic: ${selectedTopic}, Difficulty: ${targetDifficulty}`);
 
-  if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your_groq_api_key_here') {
+  const apiKey = process.env.GROQ_API_KEY;
+
+  if (apiKey && apiKey !== 'your_groq_api_key_here') {
     try {
+      const groqClient = new Groq({ apiKey });
+
       const prompt = `You are an expert computer science evaluator. Generate a multiple-choice question for:
 Subject: ${subject}
 Topic: ${selectedTopic}
@@ -26,7 +28,7 @@ Return strictly a raw valid JSON object with NO markdown formatting, NO backtick
   "explanation": "Short explanation of correct answer"
 }`;
 
-      const chatCompletion = await groq.chat.completions.create({
+      const chatCompletion = await groqClient.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
         model: 'qwen/qwen3.8-27b',
         temperature: 0.5,
