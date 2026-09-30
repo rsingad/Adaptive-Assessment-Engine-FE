@@ -39,16 +39,16 @@ export function LearningPath() {
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs uppercase font-bold tracking-widest text-brand-400">
-              Phase 5 Milestone
+            <span className="text-xs uppercase font-bold tracking-widest text-accent-400">
+              Personalized Pathway
             </span>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Personalized Learning Path
+              Generating Your Adaptive Curriculum
             </h1>
             <p className="text-sm text-slate-400 max-w-md mx-auto leading-relaxed">
-              Your customized curriculum based on identified concept gaps in{' '}
-              <span className="text-white font-semibold">{selectedSubject?.label || 'Computer Science'}</span>{' '}
-              will be unlocked in the upcoming learning pathway phase.
+              Your customized learning path based on identified concept gaps in{' '}
+              <span className="text-white font-semibold">{selectedSubject?.label || 'your chosen domain'}</span>{' '}
+              is being compiled from your diagnostic baseline.
             </p>
           </div>
 

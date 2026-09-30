@@ -44,9 +44,9 @@ export function QuestionCard({
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-slate-400">Difficulty:</span>
+          <span className="text-slate-400">Level:</span>
           <span className={`px-2.5 py-0.5 rounded-full font-semibold border ${difficultyMeta.bg} ${difficultyMeta.color} border-current/20`}>
-            {difficultyMeta.label} ({question.difficulty?.toFixed(2)})
+            {difficultyMeta.label}
           </span>
         </div>
       </CardHeader>

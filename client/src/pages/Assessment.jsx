@@ -13,6 +13,8 @@ import Button from '../components/ui/Button';
 import { AlertCircle, RotateCcw, ArrowLeft, BookOpen } from 'lucide-react';
 import { ICON_MAP_DYNAMIC } from '../utils/subjectIcons';
 
+import PreparingAssessment from '../components/assessment/PreparingAssessment';
+
 export function Assessment() {
   const navigate = useNavigate();
   const { user, selectedSubject } = useAuth();
@@ -53,46 +55,29 @@ export function Assessment() {
   const progressPercentage = Math.round(((questionIndex - 1) / totalQuestions) * 100);
   const SubjectIcon = selectedSubject ? (ICON_MAP_DYNAMIC[selectedSubject.icon] || BookOpen) : BookOpen;
 
+  // Render Full-Screen Calibration UI during Loading
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-        <LoadingSpinner
-          size="lg"
-          message={`Initializing adaptive session for ${selectedSubject?.label || 'Computer Science'}...`}
-        />
-      </div>
+      <PreparingAssessment
+        subjectName={selectedSubject?.label || 'Mathematics'}
+      />
     );
   }
 
+  // Render Error UI if initialization failed
   if (status === 'error' && !currentQuestion) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-        <Card className="max-w-md w-full p-6 text-center border-rose-500/30 bg-slate-900">
-          <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <h2 className="text-xl font-bold text-white mb-2">Connection Error</h2>
-          <p className="text-sm text-slate-400 mb-6">{error || 'Failed to communicate with assessment engine.'}</p>
-          <div className="flex gap-3 justify-center">
-            <Button variant="outline" onClick={() => navigate('/select-subject')}>
-              <ArrowLeft className="w-4 h-4 mr-1.5" />
-              Change Subject
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => {
-                resetAssessment();
-                const subjectName = selectedSubject?.label || 'DSA';
-                const userId = user?.id || 'guest_user';
-                startAssessment({ userId, subject: subjectName });
-              }}
-            >
-              <RotateCcw className="w-4 h-4 mr-1.5" />
-              Retry
-            </Button>
-          </div>
-        </Card>
-      </div>
+      <PreparingAssessment
+        subjectName={selectedSubject?.label || 'Mathematics'}
+        error={error || 'Failed to communicate with assessment engine.'}
+        onChangeSubject={() => navigate('/select-subject')}
+        onRetry={() => {
+          resetAssessment();
+          const subjectName = selectedSubject?.label || 'DSA';
+          const userId = user?.id || 'guest_user';
+          startAssessment({ userId, subject: subjectName });
+        }}
+      />
     );
   }
 
@@ -117,38 +102,36 @@ export function Assessment() {
       />
 
       {/* Main Content Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 z-10">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 z-10">
         
-        {/* Subject Bar */}
+        {/* Subject Context Bar */}
         {selectedSubject && (
-          <div className="flex items-center justify-between">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold border ${selectedSubject.border} ${selectedSubject.bg} ${selectedSubject.accent}`}>
-              <SubjectIcon className="w-3.5 h-3.5" />
-              <span>Subject: {selectedSubject.label}</span>
+          <div className="flex items-center justify-between text-xs pb-1 border-b border-slate-800/80">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400">Assessing:</span>
+              <span className="font-semibold text-white flex items-center gap-1.5">
+                <SubjectIcon className="w-3.5 h-3.5 text-accent-400" />
+                {selectedSubject.label}
+              </span>
             </div>
             <button
-              onClick={() => navigate('/select-subject')}
-              className="text-xs text-slate-400 hover:text-white transition-colors"
+              onClick={() => {
+                if (window.confirm('Leave assessment and choose a different domain?')) {
+                  resetAssessment();
+                  navigate('/select-subject');
+                }
+              }}
+              className="text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
             >
-              Change Subject
+              Exit to Subjects
             </button>
           </div>
         )}
 
-        {/* Real-time Dynamic Rationale Banner */}
-        <WhyQuestion
-          reason={reason}
-          explanation={explanation}
-          ability={ability}
-          previousAbility={previousAbility}
-          prerequisite={currentQuestion?.prerequisite}
-          isFirstQuestion={questionIndex === 1}
-        />
-
-        {/* Core Split Grid: Question vs Adaptive Metrics */}
+        {/* Core Layout: Question Dominates (8 cols), Metrics Support (4 cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Question Column */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Question Primary Column */}
+          <div className="lg:col-span-8 space-y-5">
             <QuestionCard
               question={currentQuestion}
               questionNumber={questionIndex}
@@ -158,10 +141,20 @@ export function Assessment() {
               isSubmitting={status === 'submitting'}
               error={error}
             />
+
+            {/* Subtle Pedagogical Rationale underneath the Question */}
+            <WhyQuestion
+              reason={reason}
+              explanation={explanation}
+              ability={ability}
+              previousAbility={previousAbility}
+              prerequisite={currentQuestion?.prerequisite}
+              isFirstQuestion={questionIndex === 1}
+            />
           </div>
 
-          {/* Metrics & Trajectory Column */}
-          <div className="lg:col-span-5 space-y-6">
+          {/* Metrics Column: Supporting rather than overwhelming */}
+          <div className="lg:col-span-4 space-y-5">
             <AbilityGauge
               ability={ability}
               previousAbility={previousAbility}
