@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { STORAGE_KEYS } from '../utils/constants';
+import authService from '../services/authService';
 
 /**
  * AuthContext — manages user authentication and subject selection state.
- *
- * This is MOCK-only for Phase 2. No backend calls are made here.
- * When the backend is ready, replace the mock helpers inside authService.js
- * and set IS_MOCK_MODE=false — the context API remains identical.
+ * Connects to live backend API when VITE_USE_MOCK=false, with seamless mock fallback.
  */
 const AuthContext = createContext(null);
+
+const IS_MOCK_MODE = import.meta.env.VITE_USE_MOCK === 'true';
 
 // ─── Helpers for localStorage persistence ─────────────────────────────────────
 function loadPersistedUser() {
@@ -28,65 +28,95 @@ function persistUser(user) {
       localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
     }
   } catch {
-    // silently ignore quota / private-mode errors
+    // silently ignore quota errors
+  }
+}
+
+function loadPersistedSubject() {
+  try {
+    const raw = localStorage.getItem('adaptilearn_selected_subject_v1');
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistSubject(subject) {
+  try {
+    if (subject) {
+      localStorage.setItem('adaptilearn_selected_subject_v1', JSON.stringify(subject));
+    } else {
+      localStorage.removeItem('adaptilearn_selected_subject_v1');
+    }
+  } catch {
+    // silently ignore
   }
 }
 
 // ─── Provider ──────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => loadPersistedUser());
-  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedSubject, setSelectedSubjectState] = useState(() => loadPersistedSubject());
   const [authError, setAuthError] = useState(null);
   const [authLoading, setAuthLoading] = useState(false);
 
+  const setSelectedSubject = useCallback((subject) => {
+    setSelectedSubjectState(subject);
+    persistSubject(subject);
+  }, []);
+
   const isAuthenticated = Boolean(user);
 
-  // Keep localStorage in sync whenever user changes
   useEffect(() => {
     persistUser(user);
   }, [user]);
 
   /**
-   * Mock login — simulates a successful auth response.
-   * Replace body with a real API call when backend is ready.
+   * Login user with real API
    */
   const login = useCallback(async ({ email, password }) => {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      // ── MOCK: Accept any non-empty credentials ──────────────────────────────
-      await new Promise((r) => setTimeout(r, 600)); // simulate network latency
+      if (!IS_MOCK_MODE) {
+        const response = await authService.login({ email, password });
+        // Response format: { message, user: { id, name, email } }
+        setUser(response.user);
+        return { success: true, user: response.user };
+      }
+
+      // Mock mode fallback
+      await new Promise((r) => setTimeout(r, 400));
       if (!email.trim() || !password.trim()) {
         throw new Error('Email and password are required.');
       }
       if (password.length < 6) {
-        throw new Error('Invalid credentials. Please try again.');
+        throw new Error('Invalid credentials. Password must be at least 6 characters.');
       }
       const mockUser = {
         id: 'mock-user-001',
         name: email.split('@')[0],
         email: email.trim().toLowerCase(),
       };
-      // ── END MOCK ─────────────────────────────────────────────────────────────
       setUser(mockUser);
-      return { success: true };
+      return { success: true, user: mockUser };
     } catch (err) {
-      setAuthError(err.message);
-      return { success: false, error: err.message };
+      const errorMsg = err.data?.error || err.message || 'Login failed. Please verify credentials.';
+      setAuthError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
       setAuthLoading(false);
     }
   }, []);
 
   /**
-   * Mock register — simulates account creation then redirects to login.
+   * Register user with real API
    */
   const register = useCallback(async ({ name, email, password, confirmPassword }) => {
     setAuthLoading(true);
     setAuthError(null);
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      if (!name.trim() || !email.trim() || !password || !confirmPassword) {
+      if (!name.trim() || !email.trim() || !password) {
         throw new Error('All fields are required.');
       }
       if (password !== confirmPassword) {
@@ -95,24 +125,33 @@ export function AuthProvider({ children }) {
       if (password.length < 6) {
         throw new Error('Password must be at least 6 characters.');
       }
-      // Registration succeeds — user must now log in (no auto-login by design)
+
+      if (!IS_MOCK_MODE) {
+        const response = await authService.register({ name, email, password });
+        return { success: true, user: response.user };
+      }
+
+      // Mock mode fallback
+      await new Promise((r) => setTimeout(r, 400));
       return { success: true };
     } catch (err) {
-      setAuthError(err.message);
-      return { success: false, error: err.message };
+      const errorMsg = err.data?.error || err.message || 'Registration failed.';
+      setAuthError(errorMsg);
+      return { success: false, error: errorMsg };
     } finally {
       setAuthLoading(false);
     }
   }, []);
 
-  /** Log out and wipe state */
+  /** Log out and clear state */
   const logout = useCallback(() => {
     setUser(null);
-    setSelectedSubject(null);
+    setSelectedSubjectState(null);
+    persistSubject(null);
     setAuthError(null);
   }, []);
 
-  /** Clear any standing auth error (e.g. on field change) */
+  /** Clear any standing auth error */
   const clearAuthError = useCallback(() => setAuthError(null), []);
 
   const value = {
@@ -136,3 +175,5 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
   return ctx;
 }
+
+export default AuthContext;

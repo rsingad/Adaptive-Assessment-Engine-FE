@@ -22,8 +22,13 @@ export const DIFFICULTY_LEVELS = {
 };
 
 export const API_ENDPOINTS = {
+  HEALTH: '/health',
+  LOGIN: '/api/auth/login',
+  REGISTER: '/api/auth/register',
   START: '/api/assessment/start',
   ANSWER: '/api/assessment/answer',
+  RESULTS: (id) => `/api/assessment/${id}/results`,
+  DASHBOARD: (userId) => `/api/user/${userId}/dashboard`,
 };
 
 export const STORAGE_KEYS = {
