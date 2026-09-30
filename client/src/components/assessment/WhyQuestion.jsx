@@ -4,6 +4,7 @@ import { HelpCircle, AlertTriangle, ArrowUpRight, ArrowDownRight, Compass } from
 
 export function WhyQuestion({
   reason,
+  explanation = null,
   ability = 0.50,
   previousAbility = 0.50,
   prerequisite = null,
@@ -54,6 +55,10 @@ export function WhyQuestion({
     };
   }
 
+  if (!reason && !explanation) {
+    return null;
+  }
+
   const Icon = badgeConfig.icon;
 
   return (
@@ -81,6 +86,12 @@ export function WhyQuestion({
           <p className="text-sm sm:text-base text-slate-200 font-medium leading-relaxed">
             {reason || "Our adaptive algorithm selected this question based on your preceding answer pattern."}
           </p>
+
+          {explanation && (
+            <div className="mt-2 p-2.5 rounded-lg bg-slate-900/90 border border-slate-700/60 text-xs text-slate-300">
+              <strong className="text-accent-400">Concept Insight:</strong> {explanation}
+            </div>
+          )}
 
           <p className="text-xs text-slate-400 pt-1">
             {badgeConfig.subtitle}

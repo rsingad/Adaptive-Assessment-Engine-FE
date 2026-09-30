@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import SelectSubject from './pages/SelectSubject';
 import Assessment from './pages/Assessment';
 import Results from './pages/Results';
+import LearningPath from './pages/LearningPath';
 
 export function App() {
   return (
@@ -47,6 +48,14 @@ export function App() {
               element={
                 <ProtectedRoute>
                   <Results />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/learning-path"
+              element={
+                <ProtectedRoute>
+                  <LearningPath />
                 </ProtectedRoute>
               }
             />

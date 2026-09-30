@@ -4,14 +4,41 @@ import { TOTAL_ASSESSMENT_QUESTIONS, DEFAULT_INITIAL_ABILITY } from '../utils/co
 
 const AssessmentContext = createContext(null);
 
+function loadPersistedAssessmentId() {
+  try {
+    return localStorage.getItem('adaptilearn_assessment_id_v1') || null;
+  } catch {
+    return null;
+  }
+}
+
+function persistAssessmentId(id) {
+  try {
+    if (id) {
+      localStorage.setItem('adaptilearn_assessment_id_v1', id);
+    } else {
+      localStorage.removeItem('adaptilearn_assessment_id_v1');
+    }
+  } catch {
+    // ignore
+  }
+}
+
 export function AssessmentProvider({ children }) {
-  const [assessmentId, setAssessmentId] = useState(null);
+  const [assessmentId, setAssessmentIdState] = useState(() => loadPersistedAssessmentId());
+
+  const setAssessmentId = useCallback((id) => {
+    setAssessmentIdState(id);
+    persistAssessmentId(id);
+  }, []);
+
   const [currentQuestion, setCurrentQuestion] = useState(null);
   const [ability, setAbility] = useState(DEFAULT_INITIAL_ABILITY);
   const [previousAbility, setPreviousAbility] = useState(DEFAULT_INITIAL_ABILITY);
   const [questionIndex, setQuestionIndex] = useState(1);
-  const [totalQuestions] = useState(TOTAL_ASSESSMENT_QUESTIONS);
-  const [reason, setReason] = useState("Assessment initialized.");
+  const [totalQuestions, setTotalQuestions] = useState(TOTAL_ASSESSMENT_QUESTIONS);
+  const [reason, setReason] = useState("Starting assessment with medium difficulty baseline (0.50).");
+  const [explanation, setExplanation] = useState(null);
   const [abilityHistory, setAbilityHistory] = useState([
     { questionNumber: 1, ability: DEFAULT_INITIAL_ABILITY, difficulty: DEFAULT_INITIAL_ABILITY, correct: null, topic: "Baseline" }
   ]);
@@ -23,33 +50,40 @@ export function AssessmentProvider({ children }) {
 
   /**
    * Start or restart an assessment session
+   * @param {Object} options - { userId, subject }
    */
-  const startAssessment = useCallback(async () => {
+  const startAssessment = useCallback(async (options = {}) => {
     setStatus('loading');
     setError(null);
     setSelectedAnswer(null);
     setLastFeedback(null);
+    setExplanation(null);
     try {
-      const response = await assessmentService.startAssessment();
+      const response = await assessmentService.startAssessment({
+        userId: options.userId || 'guest_user',
+        subject: options.subject || 'DSA',
+      });
+
       setAssessmentId(response.assessmentId);
       setCurrentQuestion(response.question);
       setAbility(response.ability);
       setPreviousAbility(response.ability);
       setReason(response.reason || "Starting calibration assessment.");
-      setQuestionIndex(1);
+      setQuestionIndex(response.questionCount || 1);
+      setTotalQuestions(response.totalQuestions || TOTAL_ASSESSMENT_QUESTIONS);
       setAbilityHistory([
         {
-          questionNumber: 1,
+          questionNumber: response.questionCount || 1,
           ability: response.ability,
           difficulty: response.question?.difficulty || 0.5,
           correct: null,
-          topic: response.question?.topic || "General"
+          topic: response.question?.topic || "Baseline"
         }
       ]);
       setStatus('in-progress');
     } catch (err) {
       console.error("Failed to start assessment:", err);
-      setError(err.message || "Failed to start assessment session");
+      setError(err.data?.error || err.message || "Failed to start assessment session");
       setStatus('error');
     }
   }, []);
@@ -74,7 +108,7 @@ export function AssessmentProvider({ children }) {
       const payload = {
         assessmentId,
         questionId: currentQuestion.id,
-        answer: selectedAnswer,
+        selectedAnswer,
       };
 
       const response = await assessmentService.submitAnswer(payload);
@@ -82,7 +116,9 @@ export function AssessmentProvider({ children }) {
       setLastFeedback({
         correct: response.correct,
         reason: response.reason,
+        explanation: response.explanation,
       });
+      setExplanation(response.explanation || null);
 
       setPreviousAbility(ability);
       setAbility(response.ability);
@@ -95,29 +131,30 @@ export function AssessmentProvider({ children }) {
         {
           questionNumber: nextIndex,
           ability: response.ability,
-          difficulty: response.question?.difficulty || 0.5,
+          difficulty: currentQuestion.difficulty || 0.5,
           correct: response.correct,
           topic: currentQuestion.topic,
+          reason: response.reason,
         }
       ]);
 
-      if (response.isComplete || nextIndex > totalQuestions) {
+      if (response.completed || response.isComplete || !response.question) {
         setStatus('completed');
-        // Fetch or prepare diagnostic results
+        // Fetch real diagnostic results from backend
         const finalResults = await assessmentService.getResults(assessmentId);
         setResults(finalResults);
       } else {
         setCurrentQuestion(response.question);
-        setQuestionIndex(nextIndex);
+        setQuestionIndex(response.questionCount + 1 || nextIndex);
         setSelectedAnswer(null);
         setStatus('in-progress');
       }
     } catch (err) {
       console.error("Failed to submit answer:", err);
-      setError(err.message || "Failed to submit answer");
+      setError(err.data?.error || err.message || "Failed to submit answer");
       setStatus('error');
     }
-  }, [assessmentId, currentQuestion, selectedAnswer, ability, questionIndex, totalQuestions]);
+  }, [assessmentId, currentQuestion, selectedAnswer, ability, questionIndex]);
 
   /**
    * Reset the assessment session
@@ -129,13 +166,14 @@ export function AssessmentProvider({ children }) {
     setPreviousAbility(DEFAULT_INITIAL_ABILITY);
     setQuestionIndex(1);
     setReason("Assessment reset.");
+    setExplanation(null);
     setAbilityHistory([]);
     setSelectedAnswer(null);
     setLastFeedback(null);
     setResults(null);
     setError(null);
     setStatus('idle');
-  }, []);
+  }, [setAssessmentId]);
 
   const value = {
     assessmentId,
@@ -145,6 +183,7 @@ export function AssessmentProvider({ children }) {
     questionIndex,
     totalQuestions,
     reason,
+    explanation,
     abilityHistory,
     selectedAnswer,
     status,
@@ -171,3 +210,5 @@ export function useAssessmentContext() {
   }
   return context;
 }
+
+export default AssessmentContext;
