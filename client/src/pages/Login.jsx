@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { BrainCircuit, Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { BrainCircuit, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Alert from '../components/ui/Alert';
 
 export function Login() {
   const navigate = useNavigate();
@@ -50,145 +52,156 @@ export function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-12 relative overflow-hidden">
-      {/* Ambient gradients */}
-      <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-brand-700/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-accent-600/15 rounded-full blur-[120px] pointer-events-none" />
+    <div className="min-h-screen bg-slate-950 flex flex-col justify-between px-4 sm:px-6 py-8 relative overflow-hidden">
+      {/* Subtle ambient lighting */}
+      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-700/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[400px] h-[400px] bg-accent-600/10 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-md relative z-10">
-
-        {/* Brand header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-accent-500 p-0.5 shadow-xl shadow-brand-500/25 mb-4">
-            <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-              <BrainCircuit className="w-7 h-7 text-accent-400" />
+      {/* Brand Header */}
+      <header className="w-full max-w-5xl mx-auto flex items-center justify-between py-2 relative z-10">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-500 p-0.5 shadow-md shadow-brand-500/20 flex items-center justify-center">
+            <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
+              <BrainCircuit className="w-4 h-4 text-accent-400" />
             </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Welcome back</h1>
-          <p className="text-sm text-slate-400 mt-1">Sign in to continue to AdaptiLearn</p>
-        </div>
+          <span className="font-bold text-white tracking-tight text-base group-hover:text-brand-300 transition-colors">
+            AdaptiLearn
+          </span>
+        </Link>
 
-        {/* Registered success message */}
-        {registeredMessage && (
-          <div className="mb-5 flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm animate-fade-in">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            Account created successfully! Please sign in.
-          </div>
-        )}
+        <span className="text-xs text-slate-400">
+          New student?{' '}
+          <Link to="/register" className="text-brand-400 hover:text-brand-300 font-semibold transition-colors">
+            Create account
+          </Link>
+        </span>
+      </header>
 
-        {/* Card */}
-        <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-7 shadow-2xl shadow-black/30">
-          <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      {/* 2-Column Balanced Composition */}
+      <div className="w-full max-w-5xl mx-auto my-auto py-8 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+          
+          {/* Left Column: Product Value Narrative (Desktop) */}
+          <div className="hidden lg:block lg:col-span-6 space-y-6 text-left pr-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300">
+              <span className="w-2 h-2 rounded-full bg-accent-400 animate-pulse" />
+              <span>Adaptive Diagnostic Engine</span>
+            </div>
 
-            {/* API Error */}
-            {authError && (
-              <div className="flex items-center gap-3 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm animate-fade-in">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                {authError}
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Sign in to continue your personalized learning path.
+            </h1>
+
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Every question you answer calibrates your ability score and pinpoints conceptual gaps to accelerate mastery.
+            </p>
+
+            <div className="space-y-3 pt-2 text-xs text-slate-300">
+              <div className="flex items-center gap-2.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
+                <span>Resume active assessment sessions seamlessly</span>
               </div>
-            )}
+              <div className="flex items-center gap-2.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-accent-400" />
+                <span>View updated prerequisite maps and learning gap insights</span>
+              </div>
+            </div>
+          </div>
 
-            {/* Email */}
-            <div className="space-y-1.5">
-              <label htmlFor="login-email" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-                <input
+          {/* Right Column: Authentication Card */}
+          <div className="lg:col-span-6 w-full max-w-md mx-auto lg:max-w-none">
+            <div className="bg-slate-900/80 backdrop-blur-xl border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-5">
+              
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                  Welcome back
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                  Enter your credentials to access your diagnostic dashboard.
+                </p>
+              </div>
+
+              {registeredMessage && (
+                <Alert variant="success">
+                  Account created successfully! Please sign in.
+                </Alert>
+              )}
+
+              {authError && (
+                <Alert variant="error">
+                  {authError}
+                </Alert>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                <Input
                   id="login-email"
+                  label="Email Address"
                   type="email"
                   autoComplete="email"
                   placeholder="you@example.com"
+                  icon={Mail}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full bg-slate-800/80 border rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-slate-500 outline-none transition-all focus:ring-2 focus:ring-brand-500 focus:border-brand-500/60 ${
-                    fieldErrors.email ? 'border-rose-500/60' : 'border-slate-700 hover:border-slate-600'
-                  }`}
+                  error={fieldErrors.email}
+                  required
                 />
-              </div>
-              {fieldErrors.email && (
-                <p className="text-xs text-rose-400 flex items-center gap-1 mt-1">
-                  <AlertCircle className="w-3 h-3" /> {fieldErrors.email}
-                </p>
-              )}
-            </div>
 
-            {/* Password */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label htmlFor="login-password" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                  Password
-                </label>
-                <button
-                  type="button"
-                  className="text-xs text-brand-400 hover:text-brand-300 transition-colors"
-                  tabIndex={-1}
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
-                <input
-                  id="login-password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="Min. 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full bg-slate-800/80 border rounded-xl py-3 pl-10 pr-10 text-sm text-white placeholder-slate-500 outline-none transition-all focus:ring-2 focus:ring-brand-500 focus:border-brand-500/60 ${
-                    fieldErrors.password ? 'border-rose-500/60' : 'border-slate-700 hover:border-slate-600'
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              {fieldErrors.password && (
-                <p className="text-xs text-rose-400 flex items-center gap-1 mt-1">
-                  <AlertCircle className="w-3 h-3" /> {fieldErrors.password}
-                </p>
-              )}
-            </div>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label
+                      htmlFor="login-password"
+                      className="block text-xs font-semibold text-slate-300 uppercase tracking-wider"
+                    >
+                      Password <span className="text-brand-400" aria-hidden="true">*</span>
+                    </label>
+                  </div>
 
-            {/* Submit */}
-            <Button
-              type="submit"
-              variant="accent"
-              size="lg"
-              loading={authLoading}
-              disabled={authLoading}
-              className="w-full mt-2"
-            >
-              Sign In
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
-          </form>
+                  <Input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    placeholder="Min. 6 characters"
+                    icon={Lock}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    error={fieldErrors.password}
+                    required
+                    rightAction={
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="p-1 rounded-lg text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    }
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  variant="accent"
+                  size="lg"
+                  loading={authLoading}
+                  disabled={authLoading}
+                  className="w-full mt-2 cursor-pointer font-semibold"
+                >
+                  Sign In
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </form>
+            </div>
+          </div>
         </div>
-
-        {/* Register link */}
-        <p className="text-center text-sm text-slate-400 mt-5">
-          Don&apos;t have an account?{' '}
-          <Link
-            to="/register"
-            className="text-brand-400 hover:text-brand-300 font-semibold transition-colors"
-          >
-            Create account
-          </Link>
-        </p>
-
-        {/* Demo hint */}
-        <p className="text-center text-xs text-slate-600 mt-3">
-          Demo: any email + any password ≥ 6 chars will work
-        </p>
       </div>
+
+      {/* Footer */}
+      <footer className="w-full text-center text-xs text-slate-500 py-2 relative z-10">
+        <p>© 2026 AdaptiLearn. Educational Diagnostic Platform.</p>
+      </footer>
     </div>
   );
 }

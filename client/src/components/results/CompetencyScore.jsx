@@ -48,57 +48,54 @@ export function CompetencyScore({
         Adaptive Diagnostic Complete
       </span>
 
-      {/* Mastery Level Label (short: Beginner / Intermediate / Proficient / Advanced) */}
+      {/* Mastery Level Heading */}
       <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2 relative z-10">
-        {level} Mastery
+        {level} Understanding
       </h2>
 
-      {/* Ability Score Big Number */}
-      <div className="my-4 flex items-baseline justify-center gap-2 relative z-10">
-        <span className="text-6xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-accent-300 to-emerald-300 tabular-nums">
-          {formatAbility(score)}
-        </span>
-        <span className="text-sm font-semibold text-slate-400">/ 1.00</span>
+      {/* Primary Human-Readable Standing Pill */}
+      <div className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold border ${competency.bg} ${competency.color} ${competency.border} mb-5 relative z-10`}>
+        <Zap className="w-3.5 h-3.5" />
+        <span>{competency.label} Mastery Tier</span>
       </div>
 
-      {/* Competency Tier Pill */}
-      <div className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold border ${competency.bg} ${competency.color} ${competency.border} mb-6 relative z-10`}>
-        <Zap className="w-3 h-3" />
-        {competency.label} Standing
-      </div>
-
-      {/* Ability Meter Bar */}
-      <div className="w-full max-w-xs space-y-1.5 mb-6 relative z-10">
-        <div className="w-full h-2.5 bg-slate-800/90 rounded-full overflow-hidden border border-slate-700/60">
+      {/* Progress / Estimated Mastery Bar */}
+      <div className="w-full max-w-sm space-y-2 mb-6 relative z-10">
+        <div className="flex justify-between items-center text-xs px-0.5">
+          <span className="text-slate-400 font-medium">Estimated Mastery</span>
+          <span className="text-white font-bold">{Math.round(score * 100)}%</span>
+        </div>
+        <div className="w-full h-2.5 bg-slate-800/90 rounded-full overflow-hidden border border-slate-700/60 p-0.5">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-amber-500 via-brand-500 to-accent-400 transition-all duration-1000 ease-out"
-            style={{ width: `${Math.max(4, Math.min(100, Math.round(score * 100)))}%` }}
+            className="h-full rounded-full bg-gradient-to-r from-amber-500 via-brand-500 to-accent-400 transition-all duration-1000 ease-out shadow-sm"
+            style={{ width: `${Math.max(5, Math.min(100, Math.round(score * 100)))}%` }}
           />
         </div>
         <div className="flex justify-between text-[10px] text-slate-500 font-medium px-0.5">
-          <span>0.00 Foundational</span>
-          <span>0.50 Median</span>
-          <span>1.00 Mastery</span>
+          <span>Foundational</span>
+          <span>Developing</span>
+          <span>Proficient</span>
+          <span>Advanced</span>
         </div>
       </div>
 
-      {/* Summary Stat Pills */}
-      <div className="grid grid-cols-3 gap-3 w-full max-w-sm pt-4 border-t border-slate-800/80 relative z-10">
-        <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-center space-y-0.5">
+      {/* Performance Metric Row */}
+      <div className="grid grid-cols-3 gap-3 w-full max-w-md pt-5 border-t border-slate-800/80 relative z-10">
+        <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center space-y-0.5">
           <Target className="w-4 h-4 text-brand-400 mx-auto" />
-          <span className="text-[11px] text-slate-400 font-medium block">Ability</span>
-          <span className="text-base font-bold text-white">{formatAbility(score)}</span>
+          <span className="text-[11px] text-slate-400 font-medium block">Mastery Score</span>
+          <span className="text-base font-bold text-white">{Math.round(score * 100)}%</span>
         </div>
 
-        <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-center space-y-0.5">
+        <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center space-y-0.5">
           <CheckCircle className="w-4 h-4 text-emerald-400 mx-auto" />
           <span className="text-[11px] text-slate-400 font-medium block">Accuracy</span>
           <span className="text-base font-bold text-white">{displayAccuracy}%</span>
         </div>
 
-        <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 text-center space-y-0.5">
+        <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-center space-y-0.5">
           <Award className="w-4 h-4 text-accent-400 mx-auto" />
-          <span className="text-[11px] text-slate-400 font-medium block">Score</span>
+          <span className="text-[11px] text-slate-400 font-medium block">Assessed</span>
           <span className="text-base font-bold text-white">
             {correctCount}<span className="text-slate-500">/{totalQuestions}</span>
           </span>
