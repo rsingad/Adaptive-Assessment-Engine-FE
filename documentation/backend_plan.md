@@ -115,6 +115,9 @@ To ensure maximum focus on core adaptive functionality during a hackathon, the f
 
 ```
 server/
+├── ai_engine/
+│   ├── groqQuestionGenerator.js # Groq LLM dynamic question generation
+│   └── index.js                 # AI Engine entry point
 ├── config/
 │   └── db.js                 # MongoDB connection setup
 ├── controllers/
@@ -129,7 +132,7 @@ server/
 │   └── questionSelector.js   # Adaptive question selection algorithm
 ├── utils/
 │   └── seedQuestions.js      # Database seeder with 18 DSA questions
-├── .env                      # Environment config (PORT, MONGODB_URI)
+├── .env                      # Environment config (PORT, MONGODB_URI, GROQ_API_KEY)
 ├── package.json              # Server dependencies
 └── server.js                 # Express server entry point
 ```

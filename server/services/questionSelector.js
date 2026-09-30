@@ -1,5 +1,5 @@
 const Question = require('../models/Question');
-const { generateAIQuestion } = require('./aiGenerator');
+const { generateAIQuestion } = require('../ai_engine');
 
 /**
  * Select the next question based on current ability score, previous question correctness, and prerequisite gaps.
