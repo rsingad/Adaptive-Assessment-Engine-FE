@@ -8,6 +8,9 @@ router.get('/subjects', assessmentController.getSubjects);
 // Get user profile & history
 router.get('/user/:userId/profile', assessmentController.getUserProfile);
 
+// Generate dynamic topics for any subject via AI
+router.post('/generate-topics', assessmentController.generateTopics);
+
 // Start assessment session
 router.post('/start', assessmentController.startAssessment);
 

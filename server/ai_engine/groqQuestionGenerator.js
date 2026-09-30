@@ -85,6 +85,48 @@ Return strictly a raw valid JSON object with NO markdown formatting, NO backtick
   return fallbackQuestion;
 }
 
+/**
+ * Generate Dynamic Topics / Curriculum for any given user-defined Subject using Groq AI
+ */
+async function generateTopicsForSubject(subject) {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (apiKey && apiKey !== 'your_groq_api_key_here') {
+    try {
+      const groqClient = new Groq({ apiKey });
+      const prompt = `You are an educational curriculum expert. For the subject "${subject}", generate 5 to 6 structured learning topics arranged logically from basic to advanced. Include prerequisites between topics if applicable.
+
+Return strictly a raw valid JSON object with NO markdown, NO backticks, and NO surrounding text. Use this exact schema:
+{
+  "subject": "${subject}",
+  "topics": [
+    { "name": "Topic Name", "description": "Brief 1-sentence topic summary", "prerequisite": null },
+    { "name": "Advanced Topic Name", "description": "Summary", "prerequisite": "Topic Name" }
+  ]
+}`;
+
+      const chatCompletion = await groqClient.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: 'qwen/qwen3.8-27b',
+        temperature: 0.7,
+        response_format: { type: 'json_object' }
+      });
+
+      const parsed = JSON.parse(chatCompletion.choices[0]?.message?.content);
+      return parsed.topics;
+    } catch (error) {
+      console.error('Error generating AI topics:', error.message);
+    }
+  }
+
+  // Static Fallback topics if Groq API key is missing
+  return [
+    { name: `${subject} Foundations`, description: `Core principles of ${subject}`, prerequisite: null },
+    { name: `${subject} Intermediate Concepts`, description: `Practical applications in ${subject}`, prerequisite: `${subject} Foundations` },
+    { name: `Advanced ${subject} Problem Solving`, description: `Complex challenges in ${subject}`, prerequisite: `${subject} Intermediate Concepts` }
+  ];
+}
+
 module.exports = {
-  generateAIQuestion
+  generateAIQuestion,
+  generateTopicsForSubject
 };

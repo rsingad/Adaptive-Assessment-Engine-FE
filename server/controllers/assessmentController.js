@@ -13,13 +13,14 @@ const MAX_QUESTIONS = 10;
  */
 exports.startAssessment = async (req, res) => {
   try {
-    const { userId = 'guest_user', subject = 'DSA' } = req.body;
+    const { userId = 'guest_user', subject = 'DSA', topic } = req.body;
 
-    // Get initial starting question closest to INITIAL_ABILITY (0.50)
+    // Get initial starting question generated dynamically via Groq AI
     const { question } = await selectNextQuestion({
       targetAbility: INITIAL_ABILITY,
       excludeQuestionIds: [],
-      subject
+      subject,
+      lastQuestion: topic ? { topic } : null
     });
 
     if (!question) {
@@ -302,6 +303,31 @@ exports.getUserProfile = async (req, res) => {
   } catch (error) {
     console.error('Error fetching user profile:', error);
     res.status(500).json({ error: 'Failed to fetch user profile' });
+  }
+};
+
+/**
+ * POST /api/assessment/generate-topics
+ * Generates dynamic learning topics/curriculum for any user-defined subject using AI
+ */
+exports.generateTopics = async (req, res) => {
+  try {
+    const { subject } = req.body;
+    if (!subject) {
+      return res.status(400).json({ error: 'Subject is required' });
+    }
+
+    const { generateTopicsForSubject } = require('../ai_engine');
+    const topics = await generateTopicsForSubject(subject);
+
+    res.status(200).json({
+      subject,
+      topicsCount: topics.length,
+      topics
+    });
+  } catch (error) {
+    console.error('Error generating topics:', error);
+    res.status(500).json({ error: 'Failed to generate topics' });
   }
 };
 
