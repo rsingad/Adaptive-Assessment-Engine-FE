@@ -18,8 +18,9 @@ Instead of traditional linear testing, the engine dynamically adjusts question d
 2. **User Analytics Dashboard API**:
    - Endpoint (`GET /api/user/:userId/dashboard`) retrieving total assessments completed, overall average ability, recent assessment sessions, and overall weak vs. strong topic breakdown.
 
-3. **Fallback Dynamic Question Generator**:
-   - Integrated dynamic fallback service (`aiGenerator.js`) that automatically generates a targeted question on-the-fly when pre-seeded questions for a specific topic or difficulty level are exhausted.
+3. **Fallback Dynamic Question Generator (Groq Cloud AI)**:
+   - Integrated dynamic fallback service (`aiGenerator.js`) powered by **Groq Cloud SDK (`groq-sdk`)** using ultra-fast `llama3-8b-8192` model.
+   - Automatically generates targeted multiple-choice questions on-the-fly when pre-seeded database questions are exhausted.
 
 4. **Deterministic Adaptive Ability Algorithm**:
    - Baseline starting student ability: `0.50` (on a scale of `0.10` to `1.00`).
