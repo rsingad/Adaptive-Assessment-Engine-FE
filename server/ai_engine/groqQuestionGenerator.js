@@ -15,10 +15,13 @@ async function generateAIQuestion({ subject = 'DSA', topic, prerequisiteTopic, t
     try {
       const groqClient = new Groq({ apiKey });
 
-      const prompt = `You are an expert computer science evaluator. Generate a multiple-choice question for:
+      const randomSeed = Math.floor(Math.random() * 10000);
+      const prompt = `You are an expert computer science evaluator. Generate a UNIQUE, fresh multiple-choice question (Random Seed #${randomSeed}) for:
 Subject: ${subject}
 Topic: ${selectedTopic}
 Difficulty Level: ${targetDifficulty} (on a scale of 0.1 Easy to 1.0 Expert)
+
+Ensure the question concept is completely unique, creative, and distinct from standard basic questions.
 
 Return strictly a raw valid JSON object with NO markdown formatting, NO backticks, and NO surrounding text. Use this exact schema:
 {
@@ -31,7 +34,7 @@ Return strictly a raw valid JSON object with NO markdown formatting, NO backtick
       const chatCompletion = await groqClient.chat.completions.create({
         messages: [{ role: 'user', content: prompt }],
         model: 'qwen/qwen3.8-27b',
-        temperature: 0.5,
+        temperature: 0.85,
         response_format: { type: 'json_object' }
       });
 
